@@ -1,7 +1,7 @@
 # SWAT+ on Linux Dockerfile
 
 
-**Docker instructions. Singularity instructions are below.**.
+**Docker instructions. Singularity instructions are below.**
 
 SWAT+ may be run as one-off command from this Docker image:
 
