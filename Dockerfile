@@ -7,7 +7,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ America/Chicago
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
-#ENV NPROC $(($(grep -c ^processor /proc/cpuinfo)-1))
 
 RUN apt-get update && \
     apt-get install -y \
@@ -22,21 +21,27 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 #RUN git clone https://bitbucket.org/blacklandgrasslandmodels/modular_swatplus.git /opt/swatplus && \
-RUN wget -O /opt/swatplus.tar.bz2 https://bitbucket.org/blacklandgrasslandmodels/modular_swatplus/get/master.tar.bz2 && \
-    tar -xvf /opt/swatplus.tar.bz2 -C /opt && \
-    rm /opt/swatplus.tar.bz2 && \
-    mv /opt/*swatplus* /opt/swatplus.git && \
-    wget -O /opt/swatplus.git/source_codes/CMakeLists.txt https://raw.githubusercontent.com/joelz575/swatplus/master/src/CMakeLists.txt && \
-    mkdir /opt/swatplus.git/build
-WORKDIR "/opt/swatplus.git/build"
+#RUN wget -O /opt/swatplus.tar.bz2 https://bitbucket.org/blacklandgrasslandmodels/modular_swatplus/get/master.tar.bz2 && \
+RUN wget -O /opt/swatplus.tar.gz https://github.com/dhardestylewis/swatplus_predocker/archive/master.tar.gz && \
+    tar -xvf /opt/swatplus.tar.gz -C /opt && \
+    rm /opt/swatplus.tar.gz && \
+    mv /opt/*swatplus* /opt/swatplus.d && \
+#    wget -O /opt/swatplus.d/source_codes/CMakeLists.txt https://raw.githubusercontent.com/joelz575/swatplus/master/src/CMakeLists.txt && \
+    rm -Rf /opt/swatplus.d/build && \
+    mkdir -p /opt/swatplus.d/build
+WORKDIR "/opt/swatplus.d/build"
 RUN cmake ../source_codes && \
+    export NPROC=$(($(grep -c ^processor /proc/cpuinfo)-1)) && \
+    echo ${NPROC} && \
+    echo "make -j ${NPROC}" && \
     make -j ${NPROC} && \
+    echo "make -j ${NPROC} install" && \
     make -j ${NPROC} install && \
-    chmod +x swatplus_exe && \
-    mkdir /opt/swatplus && \
-    mv swatplus_exe /opt/swatplus && \
-    mv /opt/swatplus.git/data/TxtInOut_CoonCreek_aqu /opt/swatplus && \
-    cp /opt/swatplus/swatplus_exe /opt/swatplus/TxtInOut_CoonCreek_aqu
-    rm -Rf /opt/swatplus.git
+    chmod +x bin/swatplus_exe && \
+    mkdir -p /opt/swatplus && \
+    mv bin/swatplus_exe /opt/swatplus && \
+    mv /opt/swatplus.d/data/TxtInOut_CoonCreek_aqu /opt/swatplus && \
+    cp /opt/swatplus/swatplus_exe /opt/swatplus/TxtInOut_CoonCreek_aqu && \
+    rm -Rf /opt/swatplus.d
 WORKDIR "/"
 
