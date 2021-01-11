@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:latest as builder
 
 MAINTAINER Daniel Hardesty Lewis <dhl@tacc.utexas.edu>
 
@@ -7,6 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ America/Chicago
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
+ENV MINICONDA3_VERSION latest
 
 RUN apt-get update && \
     apt-get install -y \
@@ -44,4 +45,15 @@ RUN cmake ../source_codes && \
     cp /opt/swatplus/swatplus_exe /opt/swatplus/TxtInOut_CoonCreek_aqu && \
     rm -Rf /opt/swatplus.d
 WORKDIR "/"
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-${MINICONDA3_VERSION}-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh && \
+    /opt/conda/bin/conda clean -tipsy && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate base" >> ~/.bashrc
 
+
+FROM docker:dind
+WORKDIR "/"
+COPY --from=builder / .
