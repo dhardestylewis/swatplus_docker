@@ -1,0 +1,8 @@
+name: mic
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - pip:
+    - mic==1.3.7
+    - reprozip==1.0.16
